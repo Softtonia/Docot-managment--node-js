@@ -1,0 +1,259 @@
+const { default: mongoose } = require("mongoose");
+const renderTemplate = require("../helper/renderMail");
+const { NotifyMailTemplateData, ForgetPasswordMailTemplateData, SignupMailTemplateData, OtpMailTemplateData, OfferMailTemplateData, SubscriptionMailTemplateData, LetterpadMailTemplateData, InvoicepadMailTemplateData } = require("../models/mailSchema");
+const ReviewData = require("../models/reviewsSchema");
+
+
+
+const emailTemplateGet = async (req,res) =>{
+    try{
+        let keywords = req.query;
+        if(!keywords.type) return res.status(406).json({status:false , message : `failed: email type missing`});
+        
+        switch (keywords.type) {
+                case 'notification':
+
+                let findTemplate01 = await NotifyMailTemplateData.find().select('-__v -_id');
+                res.status(200).json({status:true , message:'success', data:findTemplate01});
+                
+                break;
+
+
+                case 'forgetpassword':
+                    let findTemplate02 = await ForgetPasswordMailTemplateData.find().select('-__v -_id');
+                    res.status(200).json({status:true , message:'success', data:findTemplate02});
+                
+                break;
+
+                case 'signup':
+                    let findTemplate03 = await SignupMailTemplateData.find().select('-__v -_id');
+                    res.status(200).json({status:true , message:'success', data:findTemplate03});
+                
+                break;
+
+                case 'otp':
+                    let findTemplate04 = await OtpMailTemplateData.find().select('-__v -_id');
+                    res.status(200).json({status:true , message:'success', data:findTemplate04});
+                
+                break;
+
+                case 'offer':
+                    let findTemplate05 = await OfferMailTemplateData.find().select('-__v -_id');
+                    res.status(200).json({status:true , message:'success', data:findTemplate05});
+                
+                break;
+
+                case 'subscription':
+                    let findTemplate06 = await SubscriptionMailTemplateData.find().select('-__v -_id');
+                    res.status(200).json({status:true , message:'success', data:findTemplate06});
+                
+                break;
+
+                case 'letterpad':
+                    let findTemplate07 = await LetterpadMailTemplateData.find().select('-__v -_id');
+                    res.status(200).json({status:true , message:'success', data:findTemplate07});
+                
+                break;
+
+                case 'invoice':
+                    let findTemplate08 = await InvoicepadMailTemplateData.find().select('-__v -_id');
+                    res.status(200).json({status:true , message:'success', data:findTemplate08});
+                
+                break;
+        
+            default:
+                res.status(406).json({status:true , message:'failed: email type error'});
+                break;
+        }
+
+        
+    }
+    catch(err){
+        return err;
+    }
+}
+
+const emailTemplatePost = async (req,res) =>{
+    try{
+        let keywords = req.query;
+    
+
+        if(!keywords.type) return res.status(406).json({status:false , message : `failed: email type missing`});
+        
+        switch (keywords.type) {
+                case 'notification':
+
+                let findTemplate01 = await NotifyMailTemplateData.findOne();
+                if(findTemplate01){
+                    findTemplate01.subject = req.body.subject || findTemplate01.subject;
+                    findTemplate01.body = req.body.body || findTemplate01.body;
+                    await findTemplate01.save();
+                    res.status(200).json({status:true , message:'success', data:findTemplate01});
+                }
+                else{
+                    let newTemplate = new NotifyMailTemplateData(req.body)
+                    await newTemplate.save();
+                    res.status(200).json({status:true , message:'success', data:newTemplate});
+                }
+                
+                break;
+
+
+                case 'forgetpassword':
+                    let findTemplate02 = await ForgetPasswordMailTemplateData.findOne();
+                    if(findTemplate02){
+                        findTemplate02.subject = req.body.subject || findTemplate02.subject;
+                        findTemplate02.body = req.body.body || findTemplate02.body;
+                        findTemplate02.reset_link = req.body.reset_link || findTemplate02.reset_link;
+                        await findTemplate02.save();
+                        res.status(200).json({status:true , message:'success', data:findTemplate02});
+                    }
+                    else{
+                        let newTemplate = new ForgetPasswordMailTemplateData(req.body)
+                        await newTemplate.save();
+                        res.status(200).json({status:true , message:'success', data:newTemplate});
+                    }
+                
+                break;
+
+                case 'signup':
+                    let findTemplate03 = await SignupMailTemplateData.findOne();
+                    if(findTemplate03){
+                        findTemplate03.subject = req.body.subject || findTemplate03.subject;
+                        findTemplate03.body = req.body.body || findTemplate03.body;
+                        await findTemplate03.save();
+                        res.status(200).json({status:true , message:'success', data:findTemplate03});
+                    }
+                    else{
+                        let newTemplate = new SignupMailTemplateData(req.body)
+                        await newTemplate.save();
+                        res.status(200).json({status:true , message:'success', data:newTemplate});
+                    }
+                
+                break;
+
+                case 'otp':
+                    let findTemplate04 = await OtpMailTemplateData.findOne();
+                    if(findTemplate04){
+                        findTemplate04.subject = req.body.subject || findTemplate04.subject;
+                        findTemplate04.body = req.body.body || findTemplate04.body;
+                        await findTemplate04.save();
+                        res.status(200).json({status:true , message:'success', data:findTemplate04});
+                    }
+                    else{
+                        let newTemplate = new OtpMailTemplateData(req.body)
+                        await newTemplate.save();
+                        res.status(200).json({status:true , message:'success', data:newTemplate});
+                    }
+                
+                break;
+
+                case 'offer':
+                    let findTemplate05 = await OfferMailTemplateData.findOne();
+                    if(findTemplate05){
+                        findTemplate05.subject = req.body.subject || findTemplate05.subject;
+                        findTemplate05.body = req.body.body || findTemplate05.body;
+                        await findTemplate05.save();
+                        res.status(200).json({status:true , message:'success', data:findTemplate05});
+                    }
+                    else{
+                        let newTemplate = new OfferMailTemplateData(req.body)
+                        await newTemplate.save();
+                        res.status(200).json({status:true , message:'success', data:newTemplate});
+                    }
+                
+                break;
+
+                case 'subscription':
+                    let findTemplate06 = await SubscriptionMailTemplateData.findOne();
+                    if(findTemplate06){
+                        findTemplate06.subject = req.body.subject || findTemplate06.subject;
+                        findTemplate06.body = req.body.body || findTemplate06.body;
+                        await findTemplate06.save();
+                        res.status(200).json({status:true , message:'success', data:findTemplate06});
+                    }
+                    else{
+                        let newTemplate = new SubscriptionMailTemplateData(req.body)
+                        await newTemplate.save();
+                        res.status(200).json({status:true , message:'success', data:newTemplate});
+                    }
+                
+                break;
+
+                case 'letterpad':
+                    let findTemplate07 = await LetterpadMailTemplateData.findOne();
+                    if(findTemplate07){
+                        findTemplate07.subject = req.body.subject || findTemplate07.subject;
+                        findTemplate07.body = req.body.body || findTemplate07.body;
+                        await findTemplate07.save();
+                        res.status(200).json({status:true , message:'success', data:findTemplate07});
+                    }
+                    else{
+                        let newTemplate = new LetterpadMailTemplateData(req.body)
+                        await newTemplate.save();
+                        res.status(200).json({status:true , message:'success', data:newTemplate});
+                    }
+                
+                break;
+
+                case 'invoice':
+                    let findTemplate08 = await InvoicepadMailTemplateData.findOne();
+                    if(findTemplate08){
+                        findTemplate08.subject = req.body.subject || findTemplate08.subject;
+                        findTemplate08.body = req.body.body || findTemplate08.body;
+                        await findTemplate08.save();
+                        res.status(200).json({status:true , message:'success', data:findTemplate08});
+                    }
+                    else{
+                        let newTemplate = new InvoicepadMailTemplateData(req.body)
+                        await newTemplate.save();
+                        res.status(200).json({status:true , message:'success', data:newTemplate});
+                    }
+                
+                break;
+        
+            default:
+                res.status(406).json({status:true , message:'failed: email type error'});
+                break;
+        }
+
+        
+    }
+    catch(err){
+        return err;
+    }
+}
+
+
+const emailTemplateTest = async (req,res) =>{
+    try{
+        const data = {
+            first_name: 'Rahul',
+            message: 'ok test message'
+        }
+
+        const template = await NotifyMailTemplateData.findOne();
+        const content = renderTemplate(template.body, data);
+
+        res.status(200).json({status:true , message:'success', data:content});
+        
+    }
+    catch(err){
+        return err;
+    }
+}
+
+
+
+// function renderTemplate(template, data) {
+//     for (let key in data) {
+//       const pattern = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
+//       template = template.replace(pattern, data[key]);
+//     }
+//     return template;
+//   }
+
+
+
+module.exports = {emailTemplateGet,emailTemplatePost,emailTemplateTest};
+
