@@ -73,7 +73,7 @@ const adminProfile = async (req,res) =>{
 
 const adminRegister = async (req,res) =>{
     try{
-            let {first_name,last_name,email,password,cpassword,address,phone,department} = req.body;
+            let {first_name,last_name,email,password,cpassword,address,phone,department,tax,fax,alternative_number,hospital} = req.body;
 
             if(!email || !password || !cpassword){
                 return res.status(406).json({status:false , message : 'some field are required.'})
@@ -95,7 +95,7 @@ const adminRegister = async (req,res) =>{
     
                     const passwordHash = await bcrypt.hash(password , 10);
                     let newAdmin = new AdminData({
-                        first_name,last_name,email,password:passwordHash,phone,address,department
+                        first_name,last_name,email,password:passwordHash,phone,address,department,tax,fax,alternative_number,hospital
                     });
 
                     await newAdmin.save();
@@ -155,6 +155,11 @@ const adminUpdate = async (req,res) =>{
                   findData.gst  =   req.body.gst || findData.gst ;
                   findData.tax  =   req.body.tax || findData.tax ;
 
+                  findData.fax  =   req.body.fax || findData.fax ;
+                  findData.alternative_number  =   req.body.alternative_number || findData.alternative_number ;
+                  findData.hospital  =   req.body.hospital || findData.hospital ;
+
+
                   await findData.save();
                   res.status(200).json({status:true , message:'success' , data: findData});
             }
@@ -175,17 +180,12 @@ const adminPassword = async (req,res) =>{
             return res.status(400).json({status:false , message:`failed: password & confirm password didn't matched`});
         }
 
-
         let findData = await AdminData.findOne({_id:req.rootID });
-
         if(!findData){
             return res.status(406).json({status:false , message : `failed: data not found`})
         }
 
-
-
         else{
-
               let passwordHash;
               if(req.body.password){
                 passwordHash = await bcrypt.hash(req.body.password , 10);
@@ -231,7 +231,7 @@ const adminForget = async (req,res) =>{
                 first_name: findEmail.first_name,
                 forget_token: forget_token,
                 ftoken_expire: ftoken_expire,
-                reset_link: template.redirect_link
+                redirect_link: template.redirect_link
             }
             const content = renderTemplate(template.body, data);
 
@@ -253,8 +253,12 @@ const adminReset = async (req,res) =>{
         if(!req.body.ftoken){
             return res.status(400).json({status:false , message:`failed: ftoken is required`});
         }
-        if(!req.body.password){
+        if(!req.body.password || !req.body.cpassword){
             return res.status(406).json({status:false , message : 'password field are required.'})
+        }
+
+        if(req.body.password !== req.body.cpassword){
+            return res.status(406).json({status:false , message : 'password & confirm password dosenot match'})
         }
 
         else{
@@ -294,22 +298,30 @@ const adminDoctorUpdate = async (req,res) =>{
 
     
 
-        let findDoctor = await DoctorData.findById({_id:keywords.id});
+        let findDoctor = await DoctorData.findOneAndUpdate({_id:keywords.id}, 
+           { $set : req.body}
+            );
+
         if(!findDoctor) return res.status(400).json({status:false , message:`failed: doctor not found`});
    
         else{
+            // let passwordHash;
+            // if(req.body.password){
+            //    passwordHash = await bcrypt.hash(req.body.password , 10);
+            // }
 
             
-            let passwordHash = await bcrypt.hash(req.body.password , 10);
         
 
 
-            findDoctor.status = req.body.status;
-            findDoctor.password = passwordHash;
-            await findDoctor.save(); 
-            console.log('entder 01' ,findDoctor )
+            // findDoctor.status = req.body.status || findDoctor.status;
+            // findDoctor.password = passwordHash || findDoctor.password;
+
             
-            res.status(200).json({status:true , message:'success: user updated.'});
+            // await findDoctor.save(); 
+            // console.log('entder 01' ,findDoctor )
+            
+            res.status(200).json({status:true , message:'success: user updated.' , data: findDoctor});
         
         }
     }

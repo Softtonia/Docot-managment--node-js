@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { TreatmentData, CategoryData, ExpertiseData } = require('./treatmentSchema');
+const BranchData = require('./branchSchema');
 
 
 const doctorSchema = new mongoose.Schema({
@@ -25,32 +26,17 @@ const doctorSchema = new mongoose.Schema({
 
     aadhar_number: Number,
     pan_number : String,
-
-    education :{
-        type : Array,
-        default : null
-    },
-
-
-
-
-    degree : String,
+    education :String,
     treatments_info : {type : mongoose.Schema.Types.ObjectId , ref : TreatmentData}, 
+    branch_info : {type : mongoose.Schema.Types.ObjectId , ref : BranchData}, 
     category_info : {type : mongoose.Schema.Types.ObjectId , ref : CategoryData}, 
     expertise_info : {type : mongoose.Schema.Types.ObjectId , ref : ExpertiseData},
     timeslots : String,
-    based_on:String,
-    commission_amount:String,
     start_time:String,
     end_time:String,
-    popular :  {
-        type : Boolean ,
-         default : false,
-        },
     profile_image : {
         type : String,
     },
- 
     address : {
         type : String,
         trim : true

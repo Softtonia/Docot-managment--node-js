@@ -1,7 +1,4 @@
 
-
-
-
 function renderTemplate(template, data) {
     for (let key in data) {
       const pattern = new RegExp(`{{\\s*${key}\\s*}}`, 'g');

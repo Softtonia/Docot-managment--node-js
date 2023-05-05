@@ -54,6 +54,7 @@ const doctorLogin = async (req,res) =>{
 
 const doctorPost = async (req,res) =>{
     try{
+
         let {
             first_name,
             last_name,
@@ -61,7 +62,7 @@ const doctorPost = async (req,res) =>{
             password,
             cpassword,
             phone,
-            hospital,
+       
             dob,
             gender,
             bio,
@@ -69,14 +70,14 @@ const doctorPost = async (req,res) =>{
             alternative_number,
             aadhar_number,
             pan_number,
-            degree,
+        
             treatments_info, 
             category_info, 
             expertise_info,
             timeslots,
             start_time,
             end_time,
-            popular,
+          
             address,
             education
         } = req.body;
@@ -108,6 +109,9 @@ const doctorPost = async (req,res) =>{
                 const self_token = randomstring.generate();
                 const self_expire = new Date().getTime()+300*10000;
 
+                console.log(passwordHash,self_token,self_expire, file1 , 'post s0002')
+
+
                 let newDoctor = new DoctorData({
 
                     first_name,
@@ -115,7 +119,7 @@ const doctorPost = async (req,res) =>{
                     email,
                     password : passwordHash,
                     phone,
-                    hospital,
+            
                     dob,
                     gender,
                     bio,
@@ -124,14 +128,12 @@ const doctorPost = async (req,res) =>{
                     alternative_number,
                     aadhar_number,
                     pan_number,
-                    degree,
-                    treatments_info, 
-                    category_info, 
-                    expertise_info,
+                    // treatments_info, 
+                    // category_info, 
+                    // expertise_info,
                     timeslots,
                     start_time,
                     end_time,
-                    popular,
                     profile_image : file1,
                     address,
                     education
@@ -139,10 +141,14 @@ const doctorPost = async (req,res) =>{
 
                 await newDoctor.save();
 
+                
+                console.log(req.body , 'post s0110')
+              
             /* ============== mail service starts ==============  */
             const template = await MailTemplateData.findOne({type:'signup'});
             const data = {
                 first_name: first_name,
+                last_name: last_name,
                 self_token: self_token,
                 self_expire: self_expire,
                 update_link: template.redirect_link,
@@ -167,13 +173,8 @@ catch(err){
 
 const doctorPut = async (req,res) =>{
     try{
-
-
-            let keywords = req.query;
-
-
-
         
+            let keywords = req.query;
             if(keywords.self_token){
                 let findData = await DoctorData.findOne({self_token:keywords.self_token });
                 if(!findData){
@@ -249,13 +250,8 @@ const doctorPut = async (req,res) =>{
                 }
             }
             else{
-        
-        
 
             let findData = await DoctorData.findOne({_id:keywords.id });
-
-            // console.log( '============== test entry 02 ============== ' , findData)
-
             if(!findData){
                 return res.status(406).json({status:false , message : `failed: data not found`})
             }
@@ -266,7 +262,6 @@ const doctorPut = async (req,res) =>{
                     if(findData.profile_image){deletefile(findData.profile_image);}
                 }
 
-
                 if(req.body.email){
                     let findEmail = await DoctorData.findOne( {email:req.body.email} );
                     if (findEmail && findEmail.id !== keywords.id) {
@@ -275,20 +270,17 @@ const doctorPut = async (req,res) =>{
                       req.body.email = req.body.email.toLowerCase();
                 }
 
-
                   let passwordHash;
                   if(req.body.password){
                     passwordHash = await bcrypt.hash(req.body.password , 10);
                   }
-
-                  
 
                   findData.first_name =   req.body.first_name || findData.first_name ;
                   findData.last_name =   req.body.last_name  || findData.last_name ;
                   findData.email =   req.body.email  || findData.email ;
                   findData.password = passwordHash || findData.password ;
                   findData.phone =   req.body.phone  || findData.phone ;
-                  findData.hospital =   req.body.hospital  || findData.hospital ;
+                //   findData.hospital =   req.body.hospital  || findData.hospital ;
                   findData.dob =   req.body.dob  || findData.dob ;
                   findData.gender =   req.body.gender  || findData.gender ;
                   findData.bio =   req.body.bio  || findData.bio ;
@@ -298,6 +290,7 @@ const doctorPut = async (req,res) =>{
 
 
                 //   findData.degree =   req.body.degree  || findData.degree ;
+
                   findData.treatments_info =   req.body.treatments_info || findData.treatments_info ; 
                   findData.category_info =   req.body.category_info || findData.category_info ; 
                   findData.expertise_info =   req.body.expertise_info || findData.expertise_info ;
@@ -313,10 +306,10 @@ const doctorPut = async (req,res) =>{
                   findData.profile_image =  file1  || findData.profile_image ;
                   findData.address =   req.body.address  || findData.address ;
                   findData.status =    req.body.status || findData.status;
+
                   await findData.save();
 
-                  res.status(200).json({status:true , message:'success' , data: findData});
-        
+                  res.status(200).json({status:true , message:'success'});
                 
             }
         }

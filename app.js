@@ -22,7 +22,6 @@ app.use(express.static('./public/'));
 app.use(userRouter);
 
 
-
 /* server test */
 app.get('/' , (req,res)=>{
     res.send('server tested');
@@ -34,4 +33,3 @@ app.get('/' , (req,res)=>{
 http.listen(process.env.PORT, ()=>{
     console.log(`server running at PORT ${process.env.PORT}`);
 })
-

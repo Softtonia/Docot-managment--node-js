@@ -14,9 +14,6 @@ const adminSchema = new mongoose.Schema({
     profile_image : {
         type : String,
     },
-    cover_image : {
-        type : String,
-    },
     address : {
         type : String,
         trim : true
@@ -29,13 +26,15 @@ const adminSchema = new mongoose.Schema({
         type: Boolean,
         default : false
     },
-    
+    alternative_number : String,
     district: String,
     state: String,
     country: String,
     pincode: String,
     gst: String,
     tax: String,
+    hospital: String,
+    fax: String,
 
     status: {
         type: Boolean,

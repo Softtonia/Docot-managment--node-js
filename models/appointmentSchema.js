@@ -1,21 +1,28 @@
 const mongoose = require('mongoose');
 const DoctorData = require('./doctorSchema');
-const PatientData = require('./patientSchema');
-const { TreatmentData, CategoryData, ExpertiseData } = require('./treatmentSchema');
+// const PatientData = require('./patientSchema');
+const { TreatmentData, DepartmentData } = require('./treatmentSchema');
+const BranchData = require('./branchSchema');
+const NewPatientData = require('./newpatientSchema');
 
 
 const appointmentSchema = new mongoose.Schema({
-    doctor_info : {type : mongoose.Schema.Types.ObjectId , ref : DoctorData}, 
     appointment_date : String,
     appointment_time : String,
     appointment_type : String,
-
-    patient_info : {type : mongoose.Schema.Types.ObjectId , ref : PatientData}, 
+    appointment_for : String,
+    patient_info : {type : mongoose.Schema.Types.ObjectId , ref : NewPatientData},
 
     appointment_status: {
         type: String,
-        default : 'wating'
+        default : 'waiting'
     },
+
+    department_info : {type : mongoose.Schema.Types.ObjectId , ref : DepartmentData},
+    treatment_info : {type : mongoose.Schema.Types.ObjectId , ref : TreatmentData},
+    experties_info : {type : mongoose.Schema.Types.ObjectId , ref : TreatmentData},
+    branch_info : {type : mongoose.Schema.Types.ObjectId , ref : BranchData},
+    doctor_info : {type : mongoose.Schema.Types.ObjectId , ref : DoctorData},
 
     email_reminder_status :{
         type: Boolean,
@@ -40,5 +47,36 @@ const appointmentSchema = new mongoose.Schema({
 });
 
 const AppointmentData = mongoose.model('appointmentpage' , appointmentSchema);
-module.exports = AppointmentData;
+
+
+const appointmentTypeSchema = new mongoose.Schema({
+    name : String,
+    status : {
+        type: Boolean,
+        default : true
+    }
+}, {
+    timestamps : true
+});
+
+const AppointmentTypeData = mongoose.model('appointmenttypepage' , appointmentTypeSchema);
+
+
+
+const appointmentBookedTimeSlotsSchema = new mongoose.Schema({
+    doctor_info : {type : mongoose.Schema.Types.ObjectId , ref : DoctorData},
+    date:String,
+    timeslot_data:String,
+    status : {
+        type: Boolean,
+        default : true
+    }
+}, {
+    timestamps : true
+});
+
+const AppointmentBookedTimeSlotsData = mongoose.model('appointmentbookedtimeslotspage' , appointmentBookedTimeSlotsSchema);
+
+
+module.exports = {AppointmentData,AppointmentTypeData,AppointmentBookedTimeSlotsData};
 

@@ -1,11 +1,13 @@
 const { default: mongoose } = require("mongoose");
 const deletefile = require("../helper/deletefile");
 const { TreatmentData } = require("../models/treatmentSchema");
+// const TreatmentData = require("../models/treatmentSchema");
+
 
 
 const treatmentGet = async (req,res) =>{
     try{
-        let findData = await TreatmentData.find().select('-__v');
+        let findData = await TreatmentData.find().select('-__v').populate('department_info' , '_id name').sort({ createdAt: 'desc' });
         if(findData){
             let count = findData.length;
             res.status(200).json({status:true , message :'success', total : count  , data:findData });
@@ -21,7 +23,8 @@ const treatmentGet = async (req,res) =>{
 
 const treatmentPost = async (req,res) =>{
     try{
-            let {name,status} = req.body;
+            let {name,status,department_info} = req.body;
+            console.log( req.body , 'department_info')
             if(!name){
                 return res.status(406).json({status:false , message : 'some field are required.'})
             }
@@ -37,18 +40,16 @@ const treatmentPost = async (req,res) =>{
                 }
             
                 let newData = new TreatmentData({
-                    name, image:file1 ,status
+                    name, image:file1, department_info, status
                 })
 
                 let saveData = await newData.save();
-
                 if(saveData){
                     res.status(202).json({status:true , message:'success' , data:saveData });
                 }
                 else{
                     res.status(404).json({status:false , message:'failed: failed to save'});
                 }
-                
             }
     }
     catch(err){
@@ -85,6 +86,7 @@ const treatmentPut = async (req,res) =>{
 
                     findData.name =  req.body.name ||   findData.name;
                     findData.image =   file1 ||  findData.image;
+                    findData.department_info =    req.body.department_info || findData.department_info;
                     findData.status =    req.body.status || findData.status;
                     await findData.save();
 

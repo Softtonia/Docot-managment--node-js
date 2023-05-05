@@ -13,8 +13,6 @@ const emailTemplateGet = async (req,res) =>{
         let findTemplate = await MailTemplateData.find({type:keywords.type}).select('-__v -_id');
                 res.status(200).json({status:true , message:'success', data:findTemplate});
 
-
-        
         // switch (keywords.type) {
         //         case 'notification':
 
@@ -69,9 +67,7 @@ const emailTemplateGet = async (req,res) =>{
         //     default:
         //         res.status(406).json({status:true , message:'failed: email type error'});
         //         break;
-        // }
-
-        
+        // }        
     }
     catch(err){
         return err;
@@ -101,8 +97,6 @@ const emailTemplatePost = async (req,res) =>{
             await newTemplate.save();
             res.status(200).json({status:true , message:'success', data:newTemplate});
         }
-
-        
     }
     catch(err){
         return err;

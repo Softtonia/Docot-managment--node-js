@@ -1,21 +1,6 @@
 const mongoose = require('mongoose');
 
 
-const treatmentSchema = new mongoose.Schema({
-    name : {
-        type : String,
-        unique:true
-    },
-    image : {
-        type : String,
-    },
-    status : {
-        type: Boolean,
-        default : true
-    },
-});
-
-const TreatmentData = mongoose.model('treatmentpage' , treatmentSchema);
 
 
 const categorySchema = new mongoose.Schema({
@@ -23,8 +8,8 @@ const categorySchema = new mongoose.Schema({
         type : String,
         unique:true
     },
-    treatments_name : String,
-    treatments_info : {type : mongoose.Schema.Types.ObjectId , ref : TreatmentData},
+    // treatments_name : String,
+    // treatments_info : {type : mongoose.Schema.Types.ObjectId , ref : TreatmentData},
     image : {
         type : String,
     },
@@ -35,6 +20,32 @@ const categorySchema = new mongoose.Schema({
 });
 
 const CategoryData = mongoose.model('categorypage' , categorySchema);
+
+
+
+const departmentSchema = new mongoose.Schema({
+    name : {
+        type : String,
+        unique:true
+    },
+    // treatments_name : String,
+    // treatments_info : {type : mongoose.Schema.Types.ObjectId , ref : TreatmentData},
+    image : {
+        type : String,
+    },
+    status : {
+        type: Boolean,
+        default : true
+    },
+},
+{
+    timestamps : true
+}
+);
+
+const DepartmentData = mongoose.model('departmentpage' , departmentSchema);
+
+
 
 
 const expertiseSchema = new mongoose.Schema({
@@ -56,5 +67,30 @@ const expertiseSchema = new mongoose.Schema({
 const ExpertiseData = mongoose.model('expertisepage' , expertiseSchema);
 
 
-module.exports = {TreatmentData,CategoryData,ExpertiseData};
+
+
+const treatmentSchema = new mongoose.Schema({
+    name : {
+        type : String,
+        unique:true
+    },
+    image : {
+        type : String,
+    },
+    department_info : {type : mongoose.Schema.Types.ObjectId , ref : DepartmentData},
+    status : {
+        type: Boolean,
+        default : true
+    },
+},
+{
+    timestamps : true
+});
+const TreatmentData = mongoose.model('treatmentpage' , treatmentSchema);
+
+
+
+module.exports = {TreatmentData,CategoryData,ExpertiseData,DepartmentData};
+
+
 

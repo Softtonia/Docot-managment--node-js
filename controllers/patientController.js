@@ -3,11 +3,12 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const randomstring = require('randomstring');
 const mailGlobalTemplate = require("../helper/mailController");
-const PatientData = require("../models/patientSchema");
+const NewPatientData = require("../models/newpatientSchema");
+
 
 const patientGet = async (req,res) =>{
     try{
-        let findData = await PatientData.find().select('-password -__v');
+        let findData = await NewPatientData.find().select('-password -__v');
         if(findData){
             let count = findData.length;
             res.status(200).json({status:true , message :'success', total_user : count  , data:findData });
@@ -28,7 +29,7 @@ const patientLogin = async (req,res) =>{
 
         if(!email || !password)  return res.status(406).json({status:false , message : 'some field are required.'});
 
-        let findEmail = await PatientData.findOne({email : email});
+        let findEmail = await NewPatientData.findOne({email : email});
         if(findEmail){
             let hashPassword = await bcrypt.compare(password , findEmail.password);
 
@@ -53,75 +54,86 @@ const patientPost = async (req,res) =>{
             first_name,
             last_name,
             email,
-            password,
-            cpassword,
             phone,
-            health_history,
             dob,
             gender,
-            allergies,
-            medications,
-            insurance_info,
             married_status,
             s_o,
             d_o,
             h_o,
-            department,
-            disease, 
-            address } = req.body;
+            age,
+            address,
 
-            email = email.toLowerCase();
+            // health_history,
+            // allergies,
+            // medications,
+            // insurance_info,
+            // department_info,
+            // doctor_info,
+            // disease, 
+         } = req.body;
+
+      
         if(!phone){
             return res.status(406).json({status:false , message : 'some field are required.'})
         }
         
-        // if(password !== cpassword){
-        //     return res.status(400).json({status:false , message:`failed: password & confirm password didn't matched`});
-        // }
-
-        else{
-
-            let findPhone = await PatientData.findOne({phone : phone});
-            if(findPhone){
-                return res.status(404).json({status:false , message:`failed: phone number already exits, try new email`});
+        if(email){
+            email = email.toLowerCase();
+            let findEmail = await NewPatientData.findOne({email : email});
+            if(findEmail){
+                return res.status(404).json({status:false , message:`failed: email already exits, try new email`});
             }
-            else{
+        }
+
+        let findPhone = await NewPatientData.findOne({phone : phone});
+        if(findPhone){
+            return res.status(404).json({status:false , message:`failed: phone number already exits, try new phone number`});
+        }
 
 
-                let file1;
-                if(req.file){
-                    file1 = process.env.SERVER_FILEUPLOAD_URL+req.file.filename;
-                }
-                
-                // const passwordHash = await bcrypt.hash(password , 10);
 
-                let newPatient = new PatientData({
+        let file1;
+        if(req.file){
+            file1 = process.env.SERVER_FILEUPLOAD_URL+req.file.filename;
+        }
+
+
+        /* uid starts */
+        const lastData = await NewPatientData.findOne().sort({ createdAt: -1 });
+        const nextId = lastData ? parseInt(lastData.assign_id.substring(3)) + 1 : 1;
+        const newId = `VAB${nextId.toString().padStart(3, '0')}`;
+        /* uid ends */
+
+
+        let newPatient = new NewPatientData({
+                    assign_id:newId,
                     first_name,
                     last_name,
                     email,
-                    // password : passwordHash,
                     phone,
-                    health_history,
                     dob,
                     gender,
-                    allergies,
-                    medications,
-                    insurance_info, 
                     profile_image : file1,
                     married_status,
                     s_o,
                     d_o,
                     h_o,
-                    department,
-                    disease, 
-                    address
-                });
+                    address,
+                    age,
+                    // health_history,
+                    // allergies,
+                    // medications,
+                    // insurance_info, 
+                    // department_info,
+                    // doctor_info,
+                    // disease, 
 
-                await newPatient.save();
-                res.status(200).json({status:true , message:'accoutn creation success' , data: newPatient});
-            }
-            
-        }
+        });
+        await newPatient.save();
+        res.status(200).json({status:true , message:'accoutn creation success' , data: newPatient});
+
+
 }
 catch(err){
     return err;
@@ -130,11 +142,9 @@ catch(err){
 
 const patientPut = async (req,res) =>{
     try{
-
-
             let keywords = req.query;
             if(!keywords.id) return res.status(406).json({status:false , message : `failed: id missing`});
-            let findData = await PatientData.findOne({_id:keywords.id });
+            let findData = await NewPatientData.findOne({_id:keywords.id });
             if(!findData){
                 return res.status(406).json({status:false , message : `failed: data not found`})
             }
@@ -145,52 +155,39 @@ const patientPut = async (req,res) =>{
                     if(findData.profile_image){deletefile(findData.profile_image);}
                 }
 
-
                 if(req.body.email){
-                    let findEmail = await PatientData.findOne( {email:req.body.email} );
+                    let findEmail = await NewPatientData.findOne( {email:req.body.email} );
                     if (findEmail && findEmail.id !== keywords.id) {
                         return res.status(406).json({status:false , message : `failed: email already used.`});
                       }
                       req.body.email = req.body.email.toLowerCase();
                 }
 
+                findData.first_name =   req.body.first_name || findData.first_name ;
+                findData.last_name =   req.body.last_name  || findData.last_name ;
+                findData.email =   req.body.email || findData.email ;
+                findData.phone =   req.body.phone  || findData.phone ;
+                findData.health_history =   req.body.health_history  || findData.health_history ;
+                findData.dob =   req.body.dob  || findData.dob ;
+                findData.gender =   req.body.gender  || findData.gender ;
+                findData.allergies =   req.body.allergies  || findData.allergies ;
+                findData.medications =   req.body.medications  || findData.medications ;
+                findData.insurance_info =   req.body.insurance_info || findData.insurance_info ; 
+                findData.profile_image =  file1  || findData.profile_image ;
+                findData.address =   req.body.address  || findData.address ;
+                findData.status =    req.body.status || findData.status;
+                findData.married_status  =  req.body.married_status || findData.married_status;
+                findData.s_o  =  req.body.s_o || findData.s_o;
+                findData.d_o  =  req.body.d_o || findData.d_o;
+                findData.h_o  =  req.body.h_o || findData.h_o;
+                findData.department_info  =  req.body.department_info || findData.department_info;
+                findData.doctor_info  =  req.body.doctor_info || findData.doctor_info;
+                findData.disease  =  req.body.disease || findData.disease;
+                findData.age  =  req.body.age || findData.age;
 
-
-
-                  let passwordHash;
-                  if(req.body.password){
-                    passwordHash = await bcrypt.hash(req.body.password , 10);
-                  }
-
-                  
-
-                  findData.first_name =   req.body.first_name || findData.first_name ;
-                  findData.last_name =   req.body.last_name  || findData.last_name ;
-                  findData.email =   req.body.email || findData.email ;
-                  findData.password = passwordHash || findData.password ;
-                  findData.phone =   req.body.phone  || findData.phone ;
-                  findData.health_history =   req.body.health_history  || findData.health_history ;
-                  findData.dob =   req.body.dob  || findData.dob ;
-                  findData.gender =   req.body.gender  || findData.gender ;
-                  findData.allergies =   req.body.allergies  || findData.allergies ;
-                  findData.medications =   req.body.medications  || findData.medications ;
-                  findData.insurance_info =   req.body.insurance_info || findData.insurance_info ; 
-                  findData.profile_image =  file1  || findData.profile_image ;
-                  findData.address =   req.body.address  || findData.address ;
-                  findData.status =    req.body.status || findData.status;
-
-                  findData.married_status  =  req.body.married_status || findData.married_status;
-                  findData.s_o  =  req.body.s_o || findData.s_o;
-                  findData.d_o  =  req.body.d_o || findData.d_o;
-                  findData.h_o  =  req.body.h_o || findData.h_o;
-                  findData.department  =  req.body.department || findData.department;
-                  findData.disease  =  req.body.disease || findData.disease;
-
-                  await findData.save();
-
-                  res.status(200).json({status:true , message:'success' , data: findData});
-        
-                
+                await findData.save();
+                res.status(200).json({status:true , message:'success' , data: findData});
+                              
             }
     }
     catch(err){
@@ -198,11 +195,33 @@ const patientPut = async (req,res) =>{
     }
 }
 
+
+const patientPatch = async (req,res) =>{
+    try{
+        let keywords = req.query;
+        if(!keywords.id) return res.status(406).json({status:false , message : `failed: patient id missing`});
+
+        let findData = await NewPatientData.updateOne({_id: keywords.id } , {
+            $set : req.body
+        });
+        if(!findData){
+            return res.status(406).json({status:false , message : `failed: to change`})
+        }
+        else{
+            res.status(200).json({status:true , message:'success'});
+        }
+}
+    catch(err){
+        return err;
+    }
+}
+
+
 const patientDelete = async (req,res) =>{
     try{
         let keywords = req.query;
         if(!keywords.id) return res.status(406).json({status:false , message : `failed: id missing`});
-        let deleteData = await PatientData.findByIdAndDelete({_id:keywords.id });
+        let deleteData = await NewPatientData.findByIdAndDelete({_id:keywords.id });
         if(!deleteData){
             return res.status(406).json({status:false , message : `failed: data not found`})
         }
@@ -226,28 +245,20 @@ const patientPassword = async (req,res) =>{
             return res.status(400).json({status:false , message:`failed: password & confirm password didn't matched`});
         }
 
-
-        let findData = await PatientData.findOne({_id:req.rootID });
-
+        let findData = await NewPatientData.findOne({_id:req.rootID });
         if(!findData){
             return res.status(406).json({status:false , message : `failed: data not found`})
         }
-
-
-
         else{
 
               let passwordHash;
               if(req.body.password){
                 passwordHash = await bcrypt.hash(req.body.password , 10);
               }
-             
+
               findData.password = passwordHash || findData.password ;
               await findData.save();
-
-              res.status(200).json({status:true , message:'success' , data: findData});
-    
-            
+              res.status(200).json({status:true , message:'success' , data: findData});            
         }
 }
     catch(err){
@@ -264,7 +275,7 @@ const patientForget = async (req,res) =>{
             return res.status(400).json({status:false , message:`failed: email is required`});
         }
         else{
-           let findEmail = await PatientData.findOne({email:email});
+           let findEmail = await NewPatientData.findOne({email:email});
 
            if(!findEmail){
             return res.status(400).json({status:false , message:`failed: email not found`});
@@ -297,7 +308,7 @@ const patientReset = async (req,res) =>{
         }
 
         else{
-           let findftoken = await PatientData.findOne({forget_token:req.body.ftoken});
+           let findftoken = await NewPatientData.findOne({forget_token:req.body.ftoken});
 
            if(!findftoken){
             return res.status(400).json({status:false , message:`failed: reset token not found`});
@@ -323,5 +334,5 @@ const patientReset = async (req,res) =>{
     }
 }
 
-module.exports = {patientGet, patientLogin, patientPost, patientPut, patientDelete,patientPassword,patientForget,patientReset};
+module.exports = {patientGet, patientLogin, patientPost, patientPut,patientPatch, patientDelete,patientPassword,patientForget,patientReset};
 
