@@ -4,11 +4,12 @@ const DoctorData = require('./doctorSchema');
 const { TreatmentData, DepartmentData } = require('./treatmentSchema');
 const BranchData = require('./branchSchema');
 const NewPatientData = require('./newpatientSchema');
+const TimeslotData = require('./timeslotsSchema');
 
 
 const appointmentSchema = new mongoose.Schema({
     appointment_date : String,
-    appointment_time : String,
+    appointment_time : {type : mongoose.Schema.Types.ObjectId , ref : TimeslotData},
     appointment_type : String,
     appointment_for : String,
     patient_info : {type : mongoose.Schema.Types.ObjectId , ref : NewPatientData},

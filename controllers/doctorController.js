@@ -10,7 +10,7 @@ const { MailTemplateData } = require("../models/mailSchema");
 
 const doctorGet = async (req,res) =>{
     try{
-        let findData = await DoctorData.find().select('-password -__v');
+        let findData = await DoctorData.find().select('-password -__v').populate('branch_info');
         if(findData){
             let count = findData.length;
             res.status(200).json({status:true , message :'success', total_user : count  , data:findData });
@@ -173,7 +173,7 @@ catch(err){
 
 const doctorPut = async (req,res) =>{
     try{
-        
+        console.log(req.body , 'branc')
             let keywords = req.query;
             if(keywords.self_token){
                 let findData = await DoctorData.findOne({self_token:keywords.self_token });
@@ -212,6 +212,8 @@ const doctorPut = async (req,res) =>{
                       passwordHash = await bcrypt.hash(req.body.password , 10);
                     }
 
+                    
+
                     findData.first_name =   req.body.first_name || findData.first_name ;
                     findData.last_name =   req.body.last_name  || findData.last_name ;
                     findData.email =   req.body.email || findData.email ;
@@ -230,6 +232,8 @@ const doctorPut = async (req,res) =>{
                     findData.treatments_info =   req.body.treatments_info || findData.treatments_info ; 
                     findData.category_info =   req.body.category_info || findData.category_info ; 
                     findData.expertise_info =   req.body.expertise_info || findData.expertise_info ;
+                    findData.branch_info =   req.body.branch_info || findData.branch_info ;
+
                     findData.timeslots =   req.body.timeslots  || findData.timeslots ;
                     
                     findData.start_time =   req.body.start_time  || findData.start_time ;
@@ -287,29 +291,21 @@ const doctorPut = async (req,res) =>{
                   findData.alternative_number = req.body.alternative_number || findData.alternative_number;
                   findData.aadhar_number = req.body.aadhar_number || findData.aadhar_number;
                   findData.pan_number = req.body.pan_number || findData.pan_number;
-
+                  findData.branch_info =   req.body.branch_info || findData.branch_info ;
 
                 //   findData.degree =   req.body.degree  || findData.degree ;
 
-                  findData.treatments_info =   req.body.treatments_info || findData.treatments_info ; 
-                  findData.category_info =   req.body.category_info || findData.category_info ; 
-                  findData.expertise_info =   req.body.expertise_info || findData.expertise_info ;
-                  findData.timeslots =   req.body.timeslots  || findData.timeslots ;
 
 
                   findData.education =   req.body.education  || findData.education ;
 
-
-                  findData.start_time =   req.body.start_time  || findData.start_time ;
-                  findData.end_time =   req.body.end_time  || findData.end_time ;
-                  findData.popular =   req.body.popular  || findData.popular ;
                   findData.profile_image =  file1  || findData.profile_image ;
                   findData.address =   req.body.address  || findData.address ;
                   findData.status =    req.body.status || findData.status;
 
                   await findData.save();
 
-                  res.status(200).json({status:true , message:'success'});
+                  res.status(200).json({status:true , message:'success', data:findData});
                 
             }
         }

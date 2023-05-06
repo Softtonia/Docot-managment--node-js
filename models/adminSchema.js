@@ -35,6 +35,7 @@ const adminSchema = new mongoose.Schema({
     tax: String,
     hospital: String,
     fax: String,
+    logo: String,
 
     status: {
         type: Boolean,

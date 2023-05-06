@@ -6,6 +6,7 @@ const mailGlobalTemplate = require("../helper/mailController");
 const renderTemplate = require("../helper/renderMail");
 const {MailTemplateData } = require("../models/mailSchema");
 const DoctorData = require("../models/doctorSchema");
+const deletefile = require("../helper/deletefile");
 
 
 
@@ -120,10 +121,15 @@ const adminUpdate = async (req,res) =>{
             }
             else{
                 let file1;
+
+                console.log(file1, 'else ene point 00')
+
+
                 if(req.file){
                     file1 = process.env.SERVER_FILEUPLOAD_URL+req.file.filename;
-                    if(findData.profile_image){deletefile(findData.image);}
+                    if(findData.profile_image){deletefile(findData.profile_image);}
                 }
+                console.log(file1, 'ckeck point 00')
 
                 if(req.body.email){
                     let findEmail = await AdminData.findOne( {email:req.body.email} );
@@ -138,6 +144,8 @@ const adminUpdate = async (req,res) =>{
                     passwordHash = await bcrypt.hash(req.body.password , 10);
                   }
 
+
+                  console.log(req.body,file1, 'ckeck point 01')
                   findData.first_name =   req.body.first_name || findData.first_name ;
                   findData.last_name =   req.body.last_name  || findData.last_name ;
                   findData.email =   req.body.email  || findData.email ;
@@ -292,6 +300,8 @@ const adminReset = async (req,res) =>{
 
 const adminDoctorUpdate = async (req,res) =>{
     try{
+
+        console.log(req.body , 'bb')
 
         let keywords = req.query;
         if(!keywords.id) return res.status(406).json({status:false , message : `failed: doctor id missing`});

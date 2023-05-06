@@ -26,7 +26,12 @@ const appointmentGet = async (req,res) =>{
 
         let keywords = req.query;
         if(keywords.doctor_info){
-            let findData = await AppointmentData.find({doctor_info:keywords.doctor_info}).select('-__v').populate('patient_info' , '_id first_name last_name assign_id phone').sort({ createdAt: 'desc' });
+            let findData = await AppointmentData.find({doctor_info:keywords.doctor_info}).select('-__v').populate('patient_info' , '_id first_name last_name assign_id phone')
+            .populate('appointment_time', 'start_time end_time')
+            .populate('department_info' , 'name')
+            .populate('treatment_info' , 'name')
+            .populate('branch_info' , 'name')
+            .sort({ createdAt: 'desc' });
             if(findData){
                 let count = findData.length;
                 res.status(200).json({status:true , message :'success', total : count  , data:findData });
@@ -38,7 +43,12 @@ const appointmentGet = async (req,res) =>{
 
 
         else{
-            let findData = await AppointmentData.find().select('-__v').populate('doctor_info' , '_id first_name last_name ').populate('patient_info' , '_id first_name last_name assign_id phone');
+            let findData = await AppointmentData.find().select('-__v').populate('doctor_info' , '_id first_name last_name ').populate('patient_info' , '_id first_name last_name assign_id phone')
+            .populate('appointment_time', 'start_time end_time')
+            .populate('department_info' , 'name')
+            .populate('treatment_info' , 'name')
+            .populate('branch_info' , 'name')
+            .sort({ createdAt: 'desc' });
             if(findData){
                 let count = findData.length;
                 res.status(200).json({status:true , message :'success', total : count  , data:findData });
@@ -60,43 +70,50 @@ const appointmentPost = async (req,res) =>{
                 doctor_info, 
                 appointment_date,
                 appointment_time,
-                appointment_type,
-                patient_info} = req.body;
+                patient_info,
+                department_info,
+                treatment_info,
+                branch_info,
+                } = req.body;
 
-            if(!doctor_info|| !appointment_date|| !appointment_time|| !appointment_type|| !patient_info){
+            if(!doctor_info|| !appointment_date|| !appointment_time|| !department_info|| !patient_info || !treatment_info || !branch_info){
                 return res.status(406).json({status:false , message : 'some field are required.'})
             }
 
-            // let findCopy = await AppointmentData.find(req.body).countDocuments();
-            // console.log(findCopy , '=================== ======================= =================')
-            // if(findCopy>0) return res.status(406).json({status:false , message : 'duplicate data not allowed', data:findCopy})
-
-
             else{
 
-                let confirmSlot = await  AppointmentData.find({
-                    "$and" : [{doctor_info : doctor_info},{appointment_date : appointment_date},{appointment_time : appointment_time}]
-                }).countDocuments();
+                // let confirmSlot = await  AppointmentData.find({
+                //     "$and" : [{doctor_info : doctor_info},{appointment_date : appointment_date},{appointment_time : appointment_time}]
+                // }).countDocuments();
 
                 
-                let appointment_status_data = 'confirm';
+                // let appointment_status_data = 'confirm';
 
 
-                if(confirmSlot>0){
-                        appointment_status_data = 'waiting';
-                }
+                // if(confirmSlot>0){
+                //         appointment_status_data = 'waiting';
+                // }
 
 
                 let newData = new AppointmentData({
                     doctor_info, 
-                appointment_date,
-                appointment_time,
-                appointment_type,
-                patient_info,
-                appointment_status:appointment_status_data
-
+                    appointment_date,
+                    appointment_time,
+                    patient_info,
+                    department_info,
+                    treatment_info,
+                    branch_info
                 })
                 let saveData = await newData.save();
+
+                let newBookedSlot = new AppointmentBookedTimeSlotsData({
+                    doctor_info :   doctor_info, 
+                    date: appointment_date,
+                    timeslot_data: appointment_time
+                });
+                await newBookedSlot.save();
+
+
                 if(saveData){
                     res.status(202).json({status:true , message:'success' , data:saveData });
                 }
